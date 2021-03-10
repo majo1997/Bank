@@ -19,7 +19,8 @@ CREATE TABLE currency_rates (
     from_id INTEGER REFERENCES currencies,
     to_id INTEGER REFERENCES currencies,
     rate NUMERIC,
-    UNIQUE (from_id, to_id) --todo always add both ways...
+    UNIQUE (from_id, to_id), --todo always add both ways...
+    CHECK (from_id != to_id) --todo in transactions same??
 );
 
 CREATE TABLE customers (

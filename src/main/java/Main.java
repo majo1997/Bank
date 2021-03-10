@@ -1,16 +1,14 @@
 //todo to package
 
-import io.github.cdimascio.dotenv.Dotenv;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
+/**
+ * Main class
+ * */
 public class Main {
-    public static void main(String[] args) {
 
+    /**
+     * Main method
+     * */
+    public static void main(String[] args) {
         EnvVariables.loadEnvVars();
 
         DbContext.getConnection();
