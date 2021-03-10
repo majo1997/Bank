@@ -1,7 +1,5 @@
+# Project exclude paths
+/target/
 .idea
 Bank.iml
 .env
-
-
-# Project exclude paths
-/target/
