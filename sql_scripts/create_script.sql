@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS accounts CASCADE;
 
 CREATE TABLE currencies (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(20)
+    name VARCHAR(20) UNIQUE
 );
 
 CREATE TABLE currency_rates (
