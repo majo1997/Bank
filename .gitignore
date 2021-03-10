@@ -1,0 +1,7 @@
+.idea
+Bank.iml
+.env
+
+
+# Project exclude paths
+/target/
