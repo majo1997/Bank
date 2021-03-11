@@ -125,6 +125,8 @@ insert into customers (first_name, last_name)
 select	random_first_name(), random_last_name()
 from generate_series(1, 100);
 
+--todo remove random functions
+
 -- CREATE TABLE currency_rates (
 --                                 id SERIAL PRIMARY KEY,
 --                                 from_id INTEGER REFERENCES currencies, --random id from currencies
