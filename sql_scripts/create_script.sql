@@ -28,7 +28,7 @@ CREATE TABLE customers (
     birth_number VARCHAR(10) UNIQUE,
     first_name VARCHAR(20),
     last_name VARCHAR(30),
-    address VARCHAR(60)
+    address VARCHAR(70)
 );
 
 CREATE TABLE accounts (

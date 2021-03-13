@@ -111,19 +111,34 @@ VALUES ('Maxwell Road Apt. 253'), ('Kristy Plaza'), ('Hart Tunnel'), ('Amy Cape'
        ('Steven Key'), ('Powers Court Suite 095'), ('Ashley Forest Suite 911'), ('Allen Junctions'), ('Wells Drives'),
        ('Zachary Turnpike Suite 890'), ('Tammy Roads'), ('Catherine Fields'), ('Martin Groves Apt. 237');
 
-create or replace function random_first_name() returns varchar(20) language sql as
+
+CREATE OR REPLACE FUNCTION random_integer() RETURNS INTEGER LANGUAGE sql AS
 $$
-select first_name from first_names order by random() limit 1
+SELECT floor((random() * 999) + 1)
 $$;
 
-create or replace function random_last_name() returns varchar(30) language sql as
+CREATE OR REPLACE FUNCTION random_first_name() RETURNS VARCHAR(20) LANGUAGE sql AS
 $$
-select last_name from last_names order by random() limit 1
+SELECT first_name FROM first_names ORDER BY random() LIMIT 1
 $$;
 
-insert into customers (first_name, last_name)
-select	random_first_name(), random_last_name()
-from generate_series(1, 100);
+CREATE OR REPLACE FUNCTION random_last_name() RETURNS VARCHAR(30) LANGUAGE sql AS
+$$
+SELECT last_name FROM last_names ORDER BY random() LIMIT 1
+$$;
+
+DROP TABLE IF EXISTS streets_cities;
+SELECT concat(street_name, ', ', city) AS address INTO streets_cities FROM cities CROSS JOIN street_names;
+
+
+CREATE OR REPLACE FUNCTION random_address() RETURNS VARCHAR(70) LANGUAGE sql AS
+$$
+SELECT concat(to_char(random_integer(), 'fm000'), ' ', address) FROM streets_cities OFFSET random() * 10000 LIMIT 1
+$$;
+
+INSERT INTO customers (first_name, last_name, address)
+SELECT 	random_first_name(), random_last_name(), random_address()
+FROM generate_series(1, 1000);
 
 --todo remove random functions
 
@@ -249,8 +264,8 @@ from generate_series(1, 100);
 -- );
 --
 -- insert into street_names (street_name)
--- values	('Main Street'), ('Church Street'), ('Main Street North'), ('Main Street South'), ('Elm Street'),
---           ('High Street'), ('Washington Street'), ('Main Street West'), ('Main Street East'), ('Park Avenue'),
+-- values	('main.Main Street'), ('Church Street'), ('main.Main Street North'), ('main.Main Street South'), ('Elm Street'),
+--           ('High Street'), ('Washington Street'), ('main.Main Street West'), ('main.Main Street East'), ('Park Avenue'),
 --           ('Walnut Street'), ('2nd Street'), ('Chestnut Street'), ('Broad Street'), ('Maple Avenue'),
 --           ('Maple Street'), ('Center Street'), ('Oak Street'), ('Pine Street'), ('River Road');
 --

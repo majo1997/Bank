@@ -1,4 +1,6 @@
-//todo to package
+package main;
+
+import user_interface.MainMenu;
 
 /**
  * Main class
@@ -6,12 +8,26 @@
 public class Main {
 
     /**
-     * Main method
+     * Application entry point
+     *
+     * @param args program arguments
      * */
     public static void main(String[] args) {
         EnvVariables.loadEnvVars();
 
         DbContext.getConnection();
+
+        MainMenu menu = new MainMenu();
+
+        boolean close = false;
+        while(!close) {
+            close = menu.showAndSelect();
+        }
+
+//        Customers customers = new Customers();
+//        customers.print();
+
+
 //        try (Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/bank", "postgres", "root")) {
 //
 //            System.out.println("Java JDBC PostgreSQL Example");
@@ -34,6 +50,7 @@ public class Main {
 //            System.out.println("Connection failure.");
 //            e.printStackTrace();
 //        }
+
         DbContext.closeConnection();
     }
 }

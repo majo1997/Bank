@@ -1,3 +1,5 @@
+package main;
+
 import io.github.cdimascio.dotenv.Dotenv;
 
 import java.util.HashMap;
