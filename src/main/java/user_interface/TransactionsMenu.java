@@ -1,11 +1,13 @@
 package user_interface;
 
+import db_operations.TransactionsOperations;
+
 import java.util.LinkedHashMap;
 
-public class TransactionsMenu extends Menu {
+public class TransactionsMenu extends ExecutionMenu {
     public TransactionsMenu() {
         options = new LinkedHashMap<>() {{
-            put("Print all account transactions", null);
+            put("Print all account transactions", new TransactionsOperations());
 
             put("Back", null);
         }};

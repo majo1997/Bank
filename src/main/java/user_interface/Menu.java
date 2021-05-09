@@ -5,14 +5,20 @@ import java.util.LinkedHashMap;
 import java.util.Scanner;
 
 public class Menu {
-
     protected final String lineBreak = "-----------------------------------------------------";
-    protected LinkedHashMap<String, Menu> options;
+    protected LinkedHashMap<String, Object> options;
 
-    private void show() {
+    protected LinkedHashMap<String, Object> getOptions() {
+        return options;
+    }
+
+    /**
+     * Prints numbered options from which user can choose.
+     * */
+    protected void show() {
         System.out.println(lineBreak);
 
-        Object[] optionNames = options.keySet().toArray();
+        Object[] optionNames = getOptions().keySet().toArray();
         for(int i = 0; i < optionNames.length; i++) {
             int index = i + 1;
             String optionName = (String) optionNames[i];
@@ -27,7 +33,7 @@ public class Menu {
      *
      * @return selected option index
      * */
-    private int getChoice() {
+    protected int getChoice() {
         Scanner sc = new Scanner(System.in);
 
         boolean selectionValid = false;
@@ -38,7 +44,7 @@ public class Menu {
                 System.out.print("Selection: ");
 
                 choice = sc.nextInt() - 1;
-                if(choice >= 0 && choice < options.size()) {
+                if(choice >= 0 && choice < getOptions().size()) {
                     selectionValid = true;
                 }
                 else {
@@ -52,23 +58,4 @@ public class Menu {
         return choice;
     }
 
-    /**
-     * Shows available options and lets the user choose by typing option number.
-     *
-     * @return boolean, whether the current menu will be closed
-     * */
-    public boolean showAndSelect() {//todo mozno bude dobre ak sa vytvori nova superclassa/interface pre tie koncove menu triedy
-        show();
-
-        int choice = getChoice();
-        String key = (String) options.keySet().toArray()[choice];
-
-        Menu nextMenu = options.get(key);
-        if(nextMenu != null) {
-            nextMenu.showAndSelect();
-            return false;
-        }
-
-        return true;
-    }
 }

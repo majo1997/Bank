@@ -2,7 +2,7 @@ package user_interface;
 
 import java.util.LinkedHashMap;
 
-public class CRUDMenu extends Menu {
+public class CRUDMenu extends RoutingMenu {
 
     public CRUDMenu() {
         options = new LinkedHashMap<>() {{

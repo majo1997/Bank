@@ -1,16 +1,18 @@
 package user_interface;
 
+import db_operations.ComplexDomainOperations;
+
 import java.util.LinkedHashMap;
 
-public class DomOpsMenu extends Menu {
+public class DomOpsMenu extends ExecutionMenu {
 
     public DomOpsMenu() {
         options = new LinkedHashMap<>() {{
-            put("Transfer money between 2 accounts", null);
-            put("Daily closing", null);
-            put("End-month closing", null);
-            put("Account deactivation", null);
-            put("Customer deactivation", null);
+            put("Transfer money between 2 accounts", new ComplexDomainOperations());
+            put("Daily closing", new ComplexDomainOperations());
+            put("End-month closing", new ComplexDomainOperations());
+            put("Account deactivation", new ComplexDomainOperations());
+            put("Customer deactivation", new ComplexDomainOperations());
 
             put("Back", null);
         }};

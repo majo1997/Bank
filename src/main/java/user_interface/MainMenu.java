@@ -2,7 +2,7 @@ package user_interface;
 
 import java.util.LinkedHashMap;
 
-public class MainMenu extends Menu {
+public class MainMenu extends RoutingMenu {
     //todo add breadcrumbs to all menus separated by '>' or some other character?
     public MainMenu() {
         options = new LinkedHashMap<>() {{

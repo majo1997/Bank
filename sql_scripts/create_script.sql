@@ -1,6 +1,6 @@
 --todo table constraints uniq, not null
 DROP TABLE IF EXISTS transactions CASCADE;
-DROP TABLE IF EXISTS transaction_statuses CASCADE;
+-- DROP TABLE IF EXISTS transaction_statuses CASCADE;
 DROP TABLE IF EXISTS payment_cards CASCADE;
 DROP TABLE IF EXISTS activation_changes CASCADE;
 DROP TABLE IF EXISTS customers CASCADE;
@@ -41,13 +41,16 @@ CREATE TABLE accounts (
     interest_rate NUMERIC,
     commitment_till DATE,
     currency_id INTEGER REFERENCES currencies,
-    customer_id INTEGER REFERENCES customers
+    customer_id INTEGER REFERENCES customers,
+    current_account_id INTEGER REFERENCES accounts, --todo pre savings accounts
+    CHECK (current_balance >= available_balance)
 );
 
-CREATE TABLE transaction_statuses (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(20) UNIQUE
-);
+--todo remove this
+-- CREATE TABLE transaction_statuses (
+--     id SERIAL PRIMARY KEY,
+--     name VARCHAR(20) UNIQUE
+-- );
 
 CREATE TABLE transactions (
     id SERIAL PRIMARY KEY,
@@ -56,7 +59,7 @@ CREATE TABLE transactions (
     from_account VARCHAR(30),
     to_account VARCHAR(30),
     datetime TIMESTAMP,
-    status INTEGER REFERENCES transaction_statuses,--bool ci presla/nepresla
+    completed BOOLEAN,
     type VARCHAR(20), -- todo pripis na ucet alebo normalny presun/vyber z atm/vklad -- definovat si co bude definovane pri kazdom type
     amount NUMERIC,
     currency_id INTEGER REFERENCES currencies
@@ -64,6 +67,7 @@ CREATE TABLE transactions (
 
 CREATE TABLE payment_cards (
     id SERIAL PRIMARY KEY,
+    --current_account_id INTEGER REFERENCES accounts
     card_id	VARCHAR(30) UNIQUE
 );
 
@@ -72,7 +76,7 @@ CREATE TABLE activation_changes (
     active BOOLEAN,
     datetime TIMESTAMP,
     customer_id INTEGER REFERENCES customers
-);
+);--todo pridat active a now ak sa prida novy customer
 
 CREATE TABLE account_statements (
     id SERIAL PRIMARY KEY,
@@ -81,4 +85,4 @@ CREATE TABLE account_statements (
     --todo add timestamp if needed
 );
 
---todo create index...
+--todo create indexes for columns used for search...

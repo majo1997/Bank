@@ -10,14 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Customers {
-    private List<Customer> customers;
+    private final List<Customer> customers;
 
     public Customers() {
         customers = new ArrayList<>();
-        getAllCustomers();
+        loadAllCustomers();
     }
 
-    private void getAllCustomers() {
+    private void loadAllCustomers() {
         String sql = "SELECT * FROM customers";
 
         Connection connection = DbContext.getConnection();

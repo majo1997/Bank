@@ -2,7 +2,7 @@ package user_interface;
 
 import java.util.LinkedHashMap;
 
-public class SavingsAccMenu extends Menu {
+public class SavingsAccMenu extends ExecutionMenu {
     public SavingsAccMenu() {
         options = new LinkedHashMap<>() {{
             //todo in first option remind the acc type...

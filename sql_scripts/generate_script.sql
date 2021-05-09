@@ -1,13 +1,11 @@
--- todo
-
-TRUNCATE TABLE currencies, currency_rates, customers, accounts, transaction_statuses, transactions, payment_cards,
+TRUNCATE TABLE currencies, currency_rates, customers, accounts, transactions, payment_cards,
     activation_changes, account_statements RESTART IDENTITY CASCADE;
 
 INSERT INTO currencies (name)
 VALUES ('USD'), ('EURO'), ('JPY'), ('GPB'), ('AUD'), ('CAD'), ('CHF');
 
--- INSERT INTO transaction_statuses (name)--todo nebude tu, budeme mat len status o tom ci uz prebehla boolean
--- VALUES (''), (''), ('');
+INSERT INTO currency_rates(from_id, to_id, rate)
+VALUES (1, 4, 5), (1, 2, 2.5), (1, 3, 3), (2, 4, 1.8), (2, 3, 8), (4, 5, 9);
 
 --random val tables
 DROP TABLE IF EXISTS first_names;
@@ -111,10 +109,47 @@ VALUES ('Maxwell Road Apt. 253'), ('Kristy Plaza'), ('Hart Tunnel'), ('Amy Cape'
        ('Steven Key'), ('Powers Court Suite 095'), ('Ashley Forest Suite 911'), ('Allen Junctions'), ('Wells Drives'),
        ('Zachary Turnpike Suite 890'), ('Tammy Roads'), ('Catherine Fields'), ('Martin Groves Apt. 237');
 
+CREATE OR REPLACE FUNCTION random_boolean() RETURNS BOOLEAN LANGUAGE sql AS
+$$
+SELECT random() < 0.5
+$$;
+
+CREATE OR REPLACE FUNCTION random_balance() RETURNS NUMERIC LANGUAGE sql AS
+$$
+SELECT round(random()::NUMERIC * 250000, 3)
+$$;
+
+CREATE OR REPLACE FUNCTION random_interest_rate() RETURNS NUMERIC LANGUAGE sql AS
+$$
+SELECT round(random()::NUMERIC * 10, 3)
+$$;
+
+CREATE OR REPLACE FUNCTION random_date() RETURNS DATE LANGUAGE sql AS
+$$
+select  date(timestamp '2018-01-10' + random() * (timestamp '2021-3-14' - timestamp '2018-01-10'))
+$$;
 
 CREATE OR REPLACE FUNCTION random_integer() RETURNS INTEGER LANGUAGE sql AS
 $$
 SELECT floor((random() * 999) + 1)
+$$;
+
+--generates random 30 digit card id
+CREATE OR REPLACE FUNCTION random_card_id() RETURNS VARCHAR(30) LANGUAGE sql AS
+$$
+SELECT array_to_string(ARRAY(SELECT chr((48 + round(random() * 9))::INTEGER) FROM generate_series(1, 30)), '')
+$$;
+
+--generates random 30 digit account number
+CREATE OR REPLACE FUNCTION random_account_number() RETURNS VARCHAR(30) LANGUAGE sql AS
+$$
+SELECT concat('SK', array_to_string(ARRAY(SELECT chr((48 + round(random() * 9))::INTEGER) FROM generate_series(1, 28)), ''))
+$$;
+
+--generates random 10 digit birth number
+CREATE OR REPLACE FUNCTION random_birth_number() RETURNS VARCHAR(10) LANGUAGE sql AS
+$$
+SELECT lpad(floor((random() * 10000000000))::VARCHAR, 10, '0')
 $$;
 
 CREATE OR REPLACE FUNCTION random_first_name() RETURNS VARCHAR(20) LANGUAGE sql AS
@@ -133,324 +168,55 @@ SELECT concat(street_name, ', ', city) AS address INTO streets_cities FROM citie
 
 CREATE OR REPLACE FUNCTION random_address() RETURNS VARCHAR(70) LANGUAGE sql AS
 $$
-SELECT concat(to_char(random_integer(), 'fm000'), ' ', address) FROM streets_cities OFFSET random() * 10000 LIMIT 1
+SELECT concat(lpad(random_integer()::VARCHAR, 3, '0'), ' ', address) FROM streets_cities TABLESAMPLE BERNOULLI(1) LIMIT 1;
+
+-- SELECT concat(lpad(random_integer()::VARCHAR, 3, '0'), ' ', address) FROM streets_cities tablesample system_rows(10) order by random() limit 1
+-- SELECT concat(lpad(random_integer()::VARCHAR, 3, '0'), ' ', address)
+-- FROM streets_cities
+-- OFFSET floor(random() * (SELECT count(*) FROM streets_cities))
+-- LIMIT 1
 $$;
 
-INSERT INTO customers (first_name, last_name, address)
-SELECT 	random_first_name(), random_last_name(), random_address()
-FROM generate_series(1, 1000);
+--todo insert in loop because can be same birth number and the it prints err
+INSERT INTO customers (birth_number, first_name, last_name, address)
+SELECT 	random_birth_number(), random_first_name(), random_last_name(), random_address()
+FROM generate_series(1, 10000)
+ON CONFLICT DO NOTHING;
 
+--todo add active status to all customers first
+--todo continue iterating throught date and check if last status was false or tr and then decide
+
+-- do $$
+--     begin
+--         for r in 1..1000 loop
+--                 INSERT INTO accounts (account_number, active, available_balance, current_balance, account_type)
+--                 SELECT random_account_number(), random_boolean(), random_balance(), random_balance(), 'current';
+--             end loop;
+--     end;
+-- $$;
+
+INSERT INTO accounts (account_number, active, available_balance, current_balance, account_type, currency_id, customer_id)
+SELECT random_account_number(), random_boolean(), 500, 500, 'CURRENT', 1, 1--todo asi nechat rovnake hodnoty current a available balance/ ale generovat nahodne
+FROM generate_series(1, 10000)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO accounts (account_number, active, available_balance, current_balance, account_type, interest_rate,
+                      commitment_till, currency_id, customer_id)
+SELECT random_account_number(), random_boolean(), 500, 500, 'TERM', random_interest_rate(),
+       random_date(), 1, 1
+FROM generate_series(1, 10000);
+
+INSERT INTO accounts (account_number, active, available_balance, current_balance, account_type, interest_rate, currency_id, customer_id)
+SELECT random_account_number(), random_boolean(), 500, 500, 'SAVINGS', random_interest_rate(), 1, 1--todo asi nebude random boolean pre active
+FROM generate_series(1, 10000);
+
+
+INSERT INTO activation_changes(active, datetime, customer_id)
+VALUES (TRUE, timestamp'2017-05-04', 1), (TRUE, timestamp'2018-05-04', 2), (FALSE, timestamp'2019-06-04', 1), (TRUE, timestamp'2021-06-04', 1);
+
+
+INSERT INTO payment_cards (card_id)
+SELECT random_card_id()
+FROM generate_series(1, 10000);
 --todo remove random functions
-
--- CREATE TABLE currency_rates (
---                                 id SERIAL PRIMARY KEY,
---                                 from_id INTEGER REFERENCES currencies, --random id from currencies
---                                 to_id INTEGER REFERENCES currencies,--random id from currencies
---                                 rate NUMERIC--random numeric value?
---                                 --add both sides
--- );
---
--- CREATE TABLE customers (
---                            id SERIAL PRIMARY KEY,
---                            birth_number VARCHAR(10) UNIQUE,--random numbers len 10
---                            first_name VARCHAR(20),--random name from table
---                            last_name VARCHAR(30),--random name from table
---                            address VARCHAR(50)--random addr from table
--- );
---
--- CREATE TABLE accounts (
---                           id SERIAL PRIMARY KEY,
---                           account_number VARCHAR(30) UNIQUE ,--random country 2 + numbers + something
---                           active BOOLEAN,--random
---                           available_balance NUMERIC,--random to 1000000 dollars?
---                           current_balance NUMERIC,--must be >= available
---                           account_type VARCHAR,--one from 3 values so from table
---                           interest_rate NUMERIC,--random number 0-10 depends on acc type if current type then null
---                           commitment_till DATE,--same as above but random date
---                           currency_id INTEGER REFERENCES currencies,--from curr
---                           customer_id INTEGER REFERENCES customers--from curr but must curr1!=curr2
--- );
---
--- --first gen transactions between accs, then trans on self...
--- CREATE TABLE transactions (
---                               id SERIAL PRIMARY KEY,
---                               from_id INTEGER REFERENCES accounts,--rand
---                               to_id INTEGER REFERENCES accounts,--rand depend on type
---                               from_account VARCHAR(30),--
---                               to_account VARCHAR(30),
---                               datetime TIMESTAMP,
---                               status INTEGER REFERENCES transaction_statuses,
---                               type VARCHAR(20), -- todo pripis na ucet alebo normalny presun/vyber z atm/vklad -- definovat si co bude definovane pri kazdom type
---                               amount NUMERIC,
---                               currency_id INTEGER REFERENCES currencies
--- );
---
--- CREATE TABLE payment_cards (
---                                id SERIAL PRIMARY KEY,
---                                card_id	VARCHAR(30) UNIQUE--random 30 len string
--- );
---
--- CREATE TABLE activation_changes (
---                                     id SERIAL PRIMARY KEY,
---                                     active BOOLEAN,--random
---                                     datetime TIMESTAMP,--random
---                                     customer_id INTEGER REFERENCES customers--rand
--- );
---
--- CREATE TABLE account_statements (
---                                     id SERIAL PRIMARY KEY,
---                                     statement TEXT,--something??
---                                     customer_id INTEGER REFERENCES customers--rand id
---     --todo add timestamp if needed
--- );
-
-
-/***************************************************************************************************************************/
-/**
- * Author:  Alexander Šimko
- * Created: Apr 6, 2017
- */
-
--- Najprv zmazeme vsetky data. Mohli by sme to robit rucne cez DELETE po jednej tabulke.
--- Museli by sme ale brat do uvahy zavislosti medzi tabulkami. Takto to za nas spravi TRUNCATE.
-
--- truncate table customers, plans, packages, user_packages, numbers, calls, rates, operations, items, invoices, payments restart identity cascade;
---
---
--- ---- pomocne tabulky na generovanie dat
---
--- -- first names
---
--- drop table if exists first_names cascade;
--- create table first_names
--- (
---     first_name varchar
--- );
---
--- insert into first_names (first_name)
--- values	('James'), ('Willie'), ('Chad'), ('Zachary'), ('Mathew'),
---           ('John'), ('Ralph'), ('Jacob'), ('Corey'), ('Tyrone'),
---           ('Robert'), ('Lawrence'), ('Lee'), ('Herman'), ('Darren'),
---           ('Michael'), ('Nicholas'), ('Melvin'), ('Maurice'), ('Lonnie'),
---           ('William'), ('Roy'), ('Alfred'), ('Vernon'), ('Lance'),
---           ('David'), ('Benjamin'), ('Kyle'), ('Roberto'), ('Cody');
---
--- -- last names
---
--- drop table if exists last_names cascade;
--- create table last_names
--- (
---     last_name varchar
--- );
---
--- insert into last_names (last_name)
--- values	('Smith'), ('Jones'), ('Taylor'), ('Williams'), ('Brown'),
---           ('Davies'), ('Evans'), ('Wilson'), ('Thomas'), ('Roberts'),
---           ('Johnson'), ('Lewis'), ('Walker'), ('Robinson'), ('Wood'),
---           ('Thompson'), ('White'), ('Watson'), ('Jackson'), ('Wright'),
---           ('Green'), ('Harris'), ('Cooper'), ('King'), ('Lee'),
---           ('Martin'), ('Clarke'), ('James'), ('Morgan'), ('Hughes'),
---           ('Edwards'), ('Hill'), ('Moore'), ('Clark'), ('Harrison'),
---           ('Scott'), ('Young'), ('Morris'), ('Hall'), ('Ward'),
---           ('Turner'), ('Carter'), ('Phillips'), ('Mitchell'), ('Patel'),
---           ('Adams'), ('Campbell'), ('Anderson'), ('Allen'), ('Cook');
---
--- -- street names
---
--- drop table if exists street_names cascade;
--- create table street_names
--- (
---     street_name varchar
--- );
---
--- insert into street_names (street_name)
--- values	('main.Main Street'), ('Church Street'), ('main.Main Street North'), ('main.Main Street South'), ('Elm Street'),
---           ('High Street'), ('Washington Street'), ('main.Main Street West'), ('main.Main Street East'), ('Park Avenue'),
---           ('Walnut Street'), ('2nd Street'), ('Chestnut Street'), ('Broad Street'), ('Maple Avenue'),
---           ('Maple Street'), ('Center Street'), ('Oak Street'), ('Pine Street'), ('River Road');
---
--- -- city names
---
--- drop table if exists city_names cascade;
--- create table city_names
--- (
---     city_name varchar
--- );
---
--- insert into city_names (city_name)
--- values	('New York'), ('Los Angeles'), ('Chicago'), ('Houston'), ('Philadelphia'),
---           ('Phoenix'), ('San Antonio'), ('San Diego'), ('Dallas'), ('San Jose'),
---           ('Austin'), ('Jacksonville'), ('San Francisco'), ('Indianapolis'), ('Columbus'),
---           ('Fort Worth'), ('Charlotte'), ('Detroit'), ('El Paso'), ('Seattle');
---
--- ---- hlavne tabulky
---
--- -- customers
---
--- create or replace function random_first_name() returns varchar language sql as
--- $$
--- select first_name from first_names tablesample system_rows(10) order by random() limit 1
--- $$;
---
--- create or replace function random_last_name() returns varchar language sql as
--- $$
--- select last_name from last_names tablesample system_rows(10) order by random() limit 1
--- $$;
---
--- create or replace function random_street_name() returns varchar language sql as
--- $$
--- select street_name from street_names tablesample system_rows(10) order by random() limit 1
--- $$;
---
--- create or replace function random_city_name() returns varchar language sql as
--- $$
--- select city_name from city_names tablesample system_rows(10) order by random() limit 1
--- $$;
---
---
--- insert into customers (first_name, last_name, birth_number, address)
--- select	random_first_name(),
---           random_last_name(),
---           floor(random() * 200) as birth_number, -- TODO: lepsie
---           random_street_name() || ' ' || floor(random() * 100) + 1 || ', ' || random_city_name() as address
--- from generate_series(1, 1000) as seq(i);
---
---
--- -- numbers
---
--- insert into numbers (number, is_emergency_number)
--- select	i, false
--- from generate_series(1, 1000) as seq(i);
---
--- -- rates
---
--- insert into rates (voice_rate, message_rate)
--- select	random() * 10,
---           random() * 3
--- from generate_series(1, 20);
---
--- -- plans
---
--- -- Najprv vlozime iba spoloce data.
--- -- Historicke plany nevytvarame, iba aktualne.
---
--- create or replace function random_customer_id() returns integer language sql as
--- $$
--- select id from customers tablesample system_rows(10) order by random() limit 1
--- $$;
---
--- create or replace function random_rate_id() returns integer language sql as
--- $$
--- select id from rates tablesample system_rows(10) order by random() limit 1
--- $$;
---
---
--- insert into plans (valid_from, valid_till, customer_id, plan_type, number_id, rate_id)
--- select  date '2016-01-01' + floor(random()*300)::integer as valid_from,
---         null::date as valid_till, -- plan je aktualny
---         random_customer_id(),
---         case when random() < 0.5 then 'postpay' else 'prepay' end as plan_type,
---         numbers.id as number_id,
---         random_rate_id()
--- from numbers; -- vytvorime tolko planov kolko cisel mame, kazdemu dame jedno cislo
---
---
--- update plans set
---                  is_dodger = random() < 0.2, -- TODO: nastavit podla realnych platieb
---                  billing_day = floor(random() * 28)::integer
--- where plan_type = 'postpay';
---
--- -- credit sa nastavuje nizsie
---
--- -- calls
---
--- create or replace function random_plan(dummy_in integer) returns table (id integer, number_id integer, rate_id integer, valid_from date) language sql as
--- $$
--- select id, number_id, rate_id, valid_from from plans tablesample system_rows(10) order by random() limit 1
--- $$;
---
--- create or replace function random_number_id_different(in_id integer) returns integer language sql as
--- $$
---     -- najprv nahodne vezme 10 riadkov a potom aplikuje podmienku
--- -- kedze kazdy riadok ma ine id, tak ich urcite 9 ostane a teda vzdy nieco vratime
--- select id from numbers tablesample system_rows(10) WHERE id != in_id order by random() limit 1
--- $$;
---
---
--- insert into calls (plan_id, source_number_id, destination_number_id, rate_id, start_datetime, duration)
--- select	plans.id,
---           plans.number_id,
---           random_number_id_different(plans.number_id),
---           plans.rate_id,
---           plans.valid_from + random()*(current_timestamp - plans.valid_from),
---           floor(random()*300)::integer + 1
--- from generate_series(1,1000) as seq(i)
---          cross join lateral random_plan(i) as plans; -- prenasame id, aby sme zakazdnym mali nove volanie
---
---
--- -- packages
--- -- Balicky su pevne dane dopredu. Pre jednoduchost system rata iba s jednym balickom.
---
--- insert into packages (name, price)
--- values ('Zadarmo na lubovolne cislo', 3);
---
--- -- user packages
--- -- User packages uz negenerujem, a tym padom ani package charges.
---
---
--- -- call charges
---
--- insert into operations (datetime, amount, plan_id, operation_type, call_id)
--- select
---         c.start_datetime + make_interval(0,0,0,0,0,duration,0) as datetime,
---         duration * voice_rate as amount,
---         p.id as plan_id,
---         'call_charge' as operation_type,
---         c.id as call_id
--- from calls as c
---          join plans as p on c.plan_id = p.id
---          join rates as r on c.rate_id = r.id;
---
---
--- -- recharge
--- -- Pre prepay plan nabijeme kredit na zaciatku tak aby stacil na vsetky hovory, ktore boli vykonane
---
--- insert into operations(datetime, amount, plan_id, operation_type)
--- select	min(c.start_datetime) as start_datetime,
---           sum(o.amount) as amount,
---           p.id as plan_id,
---           'recharge'
--- from plans as p
---          join calls as c on c.plan_id = p.id
---          join operations as o on o.call_id = c.id
--- where p.plan_type = 'prepay' and o.operation_type = 'call_charge'
--- group by p.id;
---
--- -- cize po existujucich volaniach by mali mat kredit nulovy
--- -- takze si vygenerujeme nahodny kredit a zaroven vlozite take nabitia
---
--- update plans set
---     credit = floor(random()*300)
--- where plan_type = 'prepay';
---
--- insert into operations(datetime, amount, plan_id, operation_type)
--- select	current_timestamp, credit, id, 'recharge'
--- from plans
--- where plan_type = 'prepay';
---
--- -- invoices
--- -- Invoices uz vynechavam.
---
---
--- ---- nakoniec zmazeme pomocne veci
---
--- drop table first_names, last_names, street_names, city_names cascade;
---
--- drop function random_first_name();
--- drop function random_last_name();
--- drop function random_street_name();
--- drop function random_city_name();
--- drop function random_customer_id();
--- drop function random_rate_id();
--- drop function random_plan(integer);
--- drop function random_number_id_different(integer);
+--todo count customers active at the end of quad year session
