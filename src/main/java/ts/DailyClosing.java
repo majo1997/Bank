@@ -1,10 +1,12 @@
 package ts;
 
+import main.DbContext;
 import rdg.Account;
 import rdg.AccountFinder;
 import rdg.Transaction;
 import rdg.TransactionFinder;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -16,10 +18,12 @@ public class DailyClosing {
     }
 
     public void dailyClosing() throws SQLException {
+        DbContext.getConnection().setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        DbContext.getConnection().setAutoCommit(false);
+
         List<Transaction> elements = TransactionFinder.getInstance().findUnfinishedTransactions();
 
         for(Transaction t: elements) {
-            //todo add db transaction
             Account a = AccountFinder.getInstance().findByAccountId(t.getFromId());
 
             a.setCurrentBalance(a.getCurrentBalance().subtract(t.getAmount()));
@@ -28,5 +32,7 @@ public class DailyClosing {
             t.update();
         }
 
+        DbContext.getConnection().commit();
+        DbContext.getConnection().setAutoCommit(true);
     }
 }

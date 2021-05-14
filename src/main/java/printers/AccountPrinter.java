@@ -1,14 +1,23 @@
-package entities;
+package printers;
 
 import rdg.Account;
 
+/**
+ * Printer for accounts
+ * */
 public class AccountPrinter {
     private static final AccountPrinter INSTANCE = new AccountPrinter();
 
+    /**
+     * @return instance of account printer
+     * */
     public static AccountPrinter getInstance() { return INSTANCE; }
 
     private AccountPrinter() { }
 
+    /**
+     * @param account account to print
+     * */
     public void print(Account account) {
         if (account == null) {
             throw new NullPointerException("Account is null");

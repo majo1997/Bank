@@ -1,9 +1,11 @@
 package ts;
 
-import entities.AccountType;
+import main.DbContext;
+import rdg.AccountType;
 import rdg.*;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
@@ -14,26 +16,31 @@ public class MoneyTransfer {
         return INSTANCE;
     }
 
-    public void moneyTranfer(String accountNumberFrom, String accountNumberTo, BigDecimal amount) throws TranferException, SQLException {
+    public void moneyTranfer(String accountNumberFrom, String accountNumberTo, BigDecimal amount) throws TransferException, SQLException {
         if (amount.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Amount must be higher than 0");
         }
+
+        DbContext.getConnection().setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        DbContext.getConnection().setAutoCommit(false);
+
 
         Account source = AccountFinder.getInstance().findByAccountNumber(accountNumberFrom);
         Account destination = AccountFinder.getInstance().findByAccountNumber(accountNumberTo);
 
         if(source == null) {
-            //todo acc doesnt exist
-            //todo end this func with err / raise exception??
+            DbContext.getConnection().rollback();
+            DbContext.getConnection().setAutoCommit(true);
+            throw new TransferException("Source account doesnt exist");
         }
 
         if(source.getAvailableBalance().compareTo(amount) < 0) {
-            //todo not enough balance on acc available
+            DbContext.getConnection().rollback();
+            DbContext.getConnection().setAutoCommit(true);
+            throw new TransferException("Not enough balance");
         }
 
-
         Transaction t = new Transaction();
-
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
         t.setFromId(source.getId());
@@ -50,22 +57,23 @@ public class MoneyTransfer {
                     break;
                 case TERM:
                     if(source.getCommitmentTill().getTime() < System.currentTimeMillis()) {
-                        //todo nemozme nic
-                        //return
+                        DbContext.getConnection().rollback();
+                        DbContext.getConnection().setAutoCommit(true);
+                        throw new TransferException("Source Term account commitment date still not ended");
                     }
                     break;
                 case SAVINGS:
-                    //todo ak je sporiaci tak druhy musi byt jeho current
-                    //todo tu je druhy z inej banky takze nic
-                    //return
-                    break;
+                    //sporiaci ucet nemoze byt naviazany na ucet v inej banke
+
+                    DbContext.getConnection().rollback();
+                    DbContext.getConnection().setAutoCommit(true);
+                    throw new TransferException("Savings account is not assigned into another bank account");
             }
 
             source.setAvailableBalance(source.getAvailableBalance().subtract(amount));
             source.update();
 
             t.setCompleted(false);
-
         }
         else {
             switch(AccountType.valueOf(source.getAccountType())) {
@@ -73,14 +81,16 @@ public class MoneyTransfer {
                     break;
                 case TERM:
                     if(source.getCommitmentTill().getTime() < System.currentTimeMillis()) {
-                        //todo nemozme nic
+                        DbContext.getConnection().rollback();
+                        DbContext.getConnection().setAutoCommit(true);
+                        throw new TransferException("Source Term account commitment date still not ended");
                     }
-                    //todo check commitment till if still waiting then cant
                     break;
                 case SAVINGS:
-                    //todo ak je sporiaci tak druhy musi byt jeho current
                     if(!source.getCurrentAccountId().equals(destination.getId())) {
-                        //todo nerovnaju sa treba opravit..
+                        DbContext.getConnection().rollback();
+                        DbContext.getConnection().setAutoCommit(true);
+                        throw new TransferException("You can't send money from savings acount to other current accounts, than its assigned.");
                     }
                     break;
             }
@@ -90,18 +100,20 @@ public class MoneyTransfer {
                     break;
                 case TERM:
                     if(destination.getCommitmentTill().getTime() < System.currentTimeMillis()) {
-                        //todo nemozme nic
+                        DbContext.getConnection().rollback();
+                        DbContext.getConnection().setAutoCommit(true);
+                        throw new TransferException("You can't send money to term account with still active commitment date");
                     }
-                    //todo check commitment till if still waiting then cant
                     break;
                 case SAVINGS:
                     //prevod moze byt iba z jeho current uctu na ktory je viazany
                     if(!destination.getCurrentAccountId().equals(source.getId())) {
-                        //todo nerovnaju sa treba opravit..
+                        DbContext.getConnection().rollback();
+                        DbContext.getConnection().setAutoCommit(true);
+                        throw new TransferException("You can't send to money to savings account from different current account than assigned");
                     }
                     break;
             }
-            //todo if term or savings conditions apply heree
 
             t.setToId(destination.getId());
             t.setCompleted(true);
@@ -111,8 +123,9 @@ public class MoneyTransfer {
 
             CurrencyRate cr = CurrencyRateFinder.getInstance().findCurrencyRateByCurrencyIds(source.getCurrencyId(), destination.getCurrencyId());
             if(cr == null) {
-                //todo raise exception or stahp
-                return;
+                DbContext.getConnection().rollback();
+                DbContext.getConnection().setAutoCommit(true);
+                throw new TransferException("Currency rate not found");
             }
 
             BigDecimal newAmount = amount.multiply(cr.getRate());
@@ -125,5 +138,8 @@ public class MoneyTransfer {
         }
 
         t.insert();
+
+        DbContext.getConnection().commit();
+        DbContext.getConnection().setAutoCommit(true);
     }
 }

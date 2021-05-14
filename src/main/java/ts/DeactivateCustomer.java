@@ -1,10 +1,14 @@
 package ts;
 
-import entities.AccountType;
+import main.DbContext;
+import rdg.AccountType;
 import rdg.Account;
 import rdg.AccountFinder;
+import rdg.ActivationChange;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class DeactivateCustomer {
@@ -14,14 +18,19 @@ public class DeactivateCustomer {
         return INSTANCE;
     }
 
-    public void deactivateAllCustomerAccounts(Integer customerId) throws /*todo CallException*/ SQLException/*todo , InterruptedException*/ {
+    public void deactivateAllCustomerAccounts(Integer customerId) throws SQLException, DeactivationException {
+        DbContext.getConnection().setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        DbContext.getConnection().setAutoCommit(false);
+
         List<Account> savingsAccounts = AccountFinder.getInstance().findAllAccountsByCustomerIdAndType(customerId, AccountType.SAVINGS);
         for(Account a: savingsAccounts) {
             try {
                 DeactivateAccount.getInstance().deactivateAccount(a.getAccountNumber());
             }
-            catch(SQLException e) {
-                //todo rollback + return
+            catch(SQLException | DeactivationException e) {
+                DbContext.getConnection().rollback();
+                DbContext.getConnection().setAutoCommit(true);
+                throw new DeactivationException("One of the savings accounts can not be deactivated");
             }
         }
 
@@ -30,8 +39,10 @@ public class DeactivateCustomer {
             try {
                 DeactivateAccount.getInstance().deactivateAccount(a.getAccountNumber());
             }
-            catch(SQLException e) {
-                //todo rollback
+            catch(SQLException | DeactivationException e) {
+                DbContext.getConnection().rollback();
+                DbContext.getConnection().setAutoCommit(true);
+                throw new DeactivationException("One of the term accounts can not be deactivated");
             }
         }
 
@@ -41,36 +52,24 @@ public class DeactivateCustomer {
             try {
                 DeactivateAccount.getInstance().deactivateAccount(a.getAccountNumber());
             }
-            catch(SQLException e) {
-                //todo rollback
+            catch(SQLException | DeactivationException e) {
+                DbContext.getConnection().rollback();
+                DbContext.getConnection().setAutoCommit(true);
+                throw new DeactivationException("One of the current accounts can not be deactivated");
             }
         }
 
+        ActivationChange ac = new ActivationChange();
 
+        ac.setActive(false);
+        ac.setCustomerId(customerId);
 
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        ac.setDatetime(now);
 
+        ac.insert();
 
-
-//        if (duration <= 0) {
-//            throw new IllegalArgumentException("duration must be greater than 0");
-//        }
-//
-//        int callId = CallService.getInstance().startCall(sourceNumber, destinationNumber, STEP_DURATION);
-//
-//        System.out.print("LOG: The call has started. Call id: ");
-//        System.out.println(callId);
-//
-//        Thread.sleep(STEP_SLEEP);
-//        System.out.println("LOG: One second has passed");
-//
-//        for (int i = 1; i < duration; ++i) {
-//
-//            CallService.getInstance().makeCallStep(callId, STEP_DURATION);
-//
-//            Thread.sleep(STEP_SLEEP);
-//            System.out.println("LOG: One second has passed");
-//        }
-//
-//        System.out.println("LOG: The call ended.");
+        DbContext.getConnection().commit();
+        DbContext.getConnection().setAutoCommit(true);
     }
 }

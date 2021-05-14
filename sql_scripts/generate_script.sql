@@ -7,7 +7,7 @@ VALUES ('USD'), ('EURO'), ('JPY'), ('GPB'), ('AUD'), ('CAD'), ('CHF');
 INSERT INTO currency_rates(from_id, to_id, rate)
 VALUES (1, 4, 5), (1, 2, 2.5), (1, 3, 3), (2, 4, 1.8), (2, 3, 8), (4, 5, 9);
 
---random val tables
+--random value tables
 DROP TABLE IF EXISTS first_names;
 CREATE TABLE first_names (
     first_name VARCHAR(20)
@@ -170,53 +170,44 @@ CREATE OR REPLACE FUNCTION random_address() RETURNS VARCHAR(70) LANGUAGE sql AS
 $$
 SELECT concat(lpad(random_integer()::VARCHAR, 3, '0'), ' ', address) FROM streets_cities TABLESAMPLE BERNOULLI(1) LIMIT 1;
 
--- SELECT concat(lpad(random_integer()::VARCHAR, 3, '0'), ' ', address) FROM streets_cities tablesample system_rows(10) order by random() limit 1
--- SELECT concat(lpad(random_integer()::VARCHAR, 3, '0'), ' ', address)
--- FROM streets_cities
--- OFFSET floor(random() * (SELECT count(*) FROM streets_cities))
--- LIMIT 1
+
 $$;
 
---todo insert in loop because can be same birth number and the it prints err
 INSERT INTO customers (birth_number, first_name, last_name, address)
 SELECT 	random_birth_number(), random_first_name(), random_last_name(), random_address()
-FROM generate_series(1, 10000)
+FROM generate_series(1, 1000) as t(i)
 ON CONFLICT DO NOTHING;
 
---todo add active status to all customers first
---todo continue iterating throught date and check if last status was false or tr and then decide
+INSERT INTO activation_changes (active, datetime, customer_id)
+SELECT 	TRUE, NOW(), i
+FROM generate_series(1, 1000) as t(i)
+ON CONFLICT DO NOTHING;
 
--- do $$
---     begin
---         for r in 1..1000 loop
---                 INSERT INTO accounts (account_number, active, available_balance, current_balance, account_type)
---                 SELECT random_account_number(), random_boolean(), random_balance(), random_balance(), 'current';
---             end loop;
---     end;
--- $$;
---todo mozno negenerovat cisla uctov nahodne ale pridavat o 1 vacsie a vacsie kazdemu dalsiemu, a na current balance pridat ze generovanie cisla iba do velkosti currentbalance... alebo rovnake budu...
+
 INSERT INTO accounts (account_number, active, available_balance, current_balance, account_type, currency_id, customer_id)
-SELECT random_account_number(), random_boolean(), 500, 500, 'CURRENT', 1, 1--todo asi nechat rovnake hodnoty current a available balance/ ale generovat nahodne
-FROM generate_series(1, 10000)
+SELECT random_account_number(), TRUE, 500, 500, 'CURRENT', 1, i
+FROM generate_series(1, 1000) AS t(i)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO accounts (account_number, active, available_balance, current_balance, account_type, interest_rate,
                       commitment_till, currency_id, customer_id)
-SELECT random_account_number(), random_boolean(), 500, 500, 'TERM', random_interest_rate(),
-       random_date(), 1, 1
-FROM generate_series(1, 10000);
+SELECT random_account_number(), TRUE, 500, 500, 'TERM', random_interest_rate(),
+       random_date(), 1, i
+FROM generate_series(1, 1000) AS t(i);
 
-INSERT INTO accounts (account_number, active, available_balance, current_balance, account_type, interest_rate, currency_id, customer_id)
-SELECT random_account_number(), random_boolean(), 500, 500, 'SAVINGS', random_interest_rate(), 1, 1--todo asi nebude random boolean pre active
-FROM generate_series(1, 10000);
+INSERT INTO accounts (account_number, active, available_balance, current_balance, account_type, interest_rate, currency_id, customer_id, current_account_id)
+SELECT random_account_number(), TRUE, 500, 500, 'SAVINGS', random_interest_rate(), 1, i, i
+FROM generate_series(1, 1000) AS t(i);
 
 
 INSERT INTO activation_changes(active, datetime, customer_id)
-VALUES (TRUE, timestamp'2017-05-04', 1), (TRUE, timestamp'2018-05-04', 2), (FALSE, timestamp'2019-06-04', 1), (TRUE, timestamp'2021-06-04', 1);
+VALUES (FALSE, timestamp'2017-05-04', 6), (FALSE, timestamp'2018-05-04', 7), (FALSE, timestamp'2019-06-04', 8), (FALSE, timestamp'2019-06-04', 9);
+
+INSERT INTO transactions (from_id, to_id, from_account, to_account, datetime, completed, type, amount, currency_id)
+SELECT i, i+1, NULL, NULL, NOW(), true, 'TRANSFER', 100, 1
+FROM generate_series(1, 999) AS t(i);
 
 
-INSERT INTO payment_cards (card_id)
-SELECT random_card_id()
-FROM generate_series(1, 10000);
---todo remove random functions
---todo count customers active at the end of quad year session
+INSERT INTO payment_cards (card_id, current_account_id)
+SELECT random_card_id(), i
+FROM generate_series(1, 1000) AS t(i);

@@ -1,6 +1,7 @@
-package db_operations;
+package ui_operations;
 
-import entities.*;
+import printers.*;
+import main.Utils;
 import rdg.CustomerFinder;
 import rdg.Customer;
 
@@ -40,13 +41,6 @@ public class CustomersOperations extends Operations {
         else {
             CustomerPrinter.getInstance().print(c);
         }
-//        try {
-//            Customer c = new Customer(birthNumber);
-//            System.out.println(c);
-//        }
-//        catch(InvalidValueException ex) {
-//            System.out.println(ex.getMessage());
-//        } todo remove
     }
 
     public void updateCustomerByBirthNumber() throws SQLException {
@@ -74,31 +68,6 @@ public class CustomersOperations extends Operations {
             c.update();
         }
 
-
-//        try {
-//            Customer c = new Customer(birthNumber);
-//
-//            System.out.println("Update customer information(Leave blank to keep current):");
-//            String newFirstName = Utils.getStringFromInput("Enter new first name:");
-//            if(!newFirstName.isEmpty()) {
-//                c.setFirstName(newFirstName);
-//            }
-//            String newLastName = Utils.getStringFromInput("Enter new last name:");
-//            if(!newLastName.isEmpty()) {
-//                c.setLastName(newLastName);
-//            }
-//            String newAddress = Utils.getStringFromInput("Enter new address:");
-//            if(!newAddress.isEmpty()) {
-//                c.setAddress(newAddress);
-//            }
-//
-//            c.update();
-//
-//            System.out.println("Customer (" + c.toString() + ") updated successfully");
-//        }
-//        catch(InvalidValueException ex) {
-//            System.out.println(ex.getMessage());
-//        } todo remove
     }
 
 }

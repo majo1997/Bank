@@ -1,14 +1,23 @@
-package entities;
+package printers;
 
 import rdg.Customer;
 
+/**
+ * Printer for customers
+ * */
 public class CustomerPrinter {
     private static final CustomerPrinter INSTANCE = new CustomerPrinter();
 
+    /**
+     * @return instance of customer printer
+     * */
     public static CustomerPrinter getInstance() { return INSTANCE; }
 
     private CustomerPrinter() { }
 
+    /**
+     * @param customer customer to print
+     * */
     public void print(Customer customer) {
         if (customer == null) {
             throw new NullPointerException("Customer is null");

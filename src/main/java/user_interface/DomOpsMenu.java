@@ -1,6 +1,6 @@
 package user_interface;
 
-import db_operations.ComplexDomainOperations;
+import ui_operations.ComplexDomainOperations;
 
 import java.util.LinkedHashMap;
 

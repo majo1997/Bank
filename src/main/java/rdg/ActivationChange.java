@@ -1,7 +1,9 @@
 package rdg;
 
 
-import java.sql.Timestamp;
+import main.DbContext;
+
+import java.sql.*;
 
 public class ActivationChange {
     private Integer id;
@@ -41,8 +43,19 @@ public class ActivationChange {
         this.customerId = customerId;
     }
 
-    public void insert() {
+    public void insert() throws SQLException {
+        try (PreparedStatement ps = DbContext.getConnection().prepareStatement("INSERT INTO activation_changes (active, datetime, customer_id) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+            ps.setBoolean(1, active);
+            ps.setTimestamp(2, datetime);
+            ps.setInt(3, customerId);
 
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                rs.next();
+                id = rs.getInt(1);
+            }
+        }
     }
 
 }

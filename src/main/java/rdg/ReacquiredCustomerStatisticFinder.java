@@ -1,4 +1,4 @@
-package entities;
+package rdg;
 
 import main.DbContext;
 
@@ -19,7 +19,6 @@ public class ReacquiredCustomerStatisticFinder {
 
     public List<ReacquiredCustomerStatistic> findAll() throws SQLException {
 
-        //todo add also years and ns where it is 0...
         try (PreparedStatement ps = DbContext.getConnection().prepareStatement(
             "SELECT " +
                     "EXTRACT(year FROM datetime) AS y, " +

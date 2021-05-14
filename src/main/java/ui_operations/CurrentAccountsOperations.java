@@ -1,13 +1,15 @@
-package db_operations;
+package ui_operations;
 
-import entities.*;
+import printers.*;
+import main.Utils;
 import rdg.Account;
 import rdg.AccountFinder;
+import rdg.AccountType;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
 
-import static entities.Utils.uniqueRandomAccountNumber;
+import static main.Utils.uniqueRandomAccountNumber;
 
 public class CurrentAccountsOperations extends Operations {
 
@@ -32,13 +34,10 @@ public class CurrentAccountsOperations extends Operations {
         for(Account a: AccountFinder.getInstance().findAllAccountsByCustomerIdAndType(customerId, AccountType.CURRENT)) {
             AccountPrinter.getInstance().print(a);
         }
-//        Integer customerId = Utils.getIntFromInput("Enter customer ID:");
-//        Accounts accounts = new Accounts(customerId, AccountType.CURRENT);
-//        accounts.print();
+
     }
 
     public void createCurrentAccount() throws SQLException {
-        //todo chyba nastane ak zadam zle id meny alebo customera treba osetrit
         Account a = new Account();
 
         a.setAccountNumber(uniqueRandomAccountNumber());
@@ -49,13 +48,11 @@ public class CurrentAccountsOperations extends Operations {
         a.setAvailableBalance(balance);
         a.setCurrentBalance(balance);
         a.setAccountType(AccountType.CURRENT.name());
-//        a.setInterestRate();
-//        a.setCommitmentTill();
+
         Integer currencyId = Utils.getIntFromInput("Enter currency ID:");
         a.setCurrencyId(currencyId);
         Integer customerId = Utils.getIntFromInput("Enter customer ID:");
         a.setCustomerId(customerId);
-//        a.setCurrentAccountId();
 
         a.insert();
 
@@ -63,14 +60,9 @@ public class CurrentAccountsOperations extends Operations {
         System.out.print("New account ID: ");
         System.out.println(a.getId());
 
-//        Integer customerId = Utils.getIntFromInput("Enter customer ID:");
-//        Integer currencyId = Utils.getIntFromInput("Enter currency ID:");
-//        CurrentAccount currentAccount = new CurrentAccount(customerId, currencyId);
-//        currentAccount.insert();
     }
 
     public void activateDeactivatedCurrentAccount() throws SQLException {
-        //todo ak je uz aktivovany tak nic nespravi
         String accountNumber = Utils.getStringFromInput("Enter account number:");
 
         Account a = AccountFinder.getInstance().findByAccountNumberAndType(accountNumber, AccountType.CURRENT);
@@ -87,14 +79,6 @@ public class CurrentAccountsOperations extends Operations {
             System.out.println("Accout has been activated");
         }
 
-//        Integer accountId = Utils.getIntFromInput("Enter account ID:");
-//
-//        try {
-//            CurrentAccount currentAccount = new CurrentAccount(accountId);
-//            currentAccount.activate();
-//        } catch (InvalidValueException ex) {
-//            System.out.println(ex.getMessage());
-//        }
     }
 
 }

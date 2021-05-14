@@ -1,10 +1,12 @@
 package ts;
 
-import entities.AccountType;
+import main.DbContext;
+import rdg.AccountType;
 import rdg.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
@@ -17,8 +19,9 @@ public class MonthlyClosing {
     }
 
     public void monthlyClosing() throws SQLException {
-        //todo poplatky
-        //todo transakcie ku vsetkemu
+        DbContext.getConnection().setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        DbContext.getConnection().setAutoCommit(false);
+
         final Integer PRECISION = 10;
 
         List<Customer> customers = CustomerFinder.getInstance().findAll();
@@ -37,6 +40,21 @@ public class MonthlyClosing {
 
                 sb.append(("Earned from savings account " + a.getAccountNumber() + ": " + currentBalanceInterest.toString() + "\n"));
 
+                Transaction t = new Transaction();
+                Timestamp now = new Timestamp(System.currentTimeMillis());
+
+                t.setFromId(a.getId());
+                t.setToId(a.getId());
+                t.setFromAccount(a.getAccountNumber());
+                t.setToAccount(a.getAccountNumber());
+                t.setDatetime(now);
+                t.setType("EARNING");
+                t.setAmount(currentBalanceInterest);
+                t.setCurrencyId(a.getCurrencyId());
+                t.setCompleted(true);
+
+                t.insert();
+
                 a.update();
             }
 
@@ -52,8 +70,24 @@ public class MonthlyClosing {
                     BigDecimal availableBalanceInterest = a.getAvailableBalance().multiply(a.getInterestRate().divide(new BigDecimal(100), PRECISION, RoundingMode.HALF_UP));
                     a.setAvailableBalance(a.getAvailableBalance().add(availableBalanceInterest));
 
+                    Transaction t = new Transaction();
+                    Timestamp now = new Timestamp(System.currentTimeMillis());
+
+                    t.setFromId(a.getId());
+                    t.setToId(a.getId());
+                    t.setFromAccount(a.getAccountNumber());
+                    t.setToAccount(a.getAccountNumber());
+                    t.setDatetime(now);
+                    t.setType("EARNING");
+                    t.setAmount(currentBalanceInterest);
+                    t.setCurrencyId(a.getCurrencyId());
+                    t.setCompleted(true);
+
+                    t.insert();
+
                     sb.append(("Earned from savings account " + a.getAccountNumber() + ": " + currentBalanceInterest.toString() + "\n"));
                 }
+
                 a.update();
             }
 
@@ -68,27 +102,7 @@ public class MonthlyClosing {
             as.insert();
         }
 
-
-//        if (duration <= 0) {
-//            throw new IllegalArgumentException("duration must be greater than 0");
-//        }
-//
-//        int callId = CallService.getInstance().startCall(sourceNumber, destinationNumber, STEP_DURATION);
-//
-//        System.out.print("LOG: The call has started. Call id: ");
-//        System.out.println(callId);
-//
-//        Thread.sleep(STEP_SLEEP);
-//        System.out.println("LOG: One second has passed");
-//
-//        for (int i = 1; i < duration; ++i) {
-//
-//            CallService.getInstance().makeCallStep(callId, STEP_DURATION);
-//
-//            Thread.sleep(STEP_SLEEP);
-//            System.out.println("LOG: One second has passed");
-//        }
-//
-//        System.out.println("LOG: The call ended.");
+        DbContext.getConnection().commit();
+        DbContext.getConnection().setAutoCommit(true);
     }
 }

@@ -1,8 +1,8 @@
-package db_operations;
+package ui_operations;
 
-import entities.AccountPrinter;
-import entities.AccountType;
-import entities.Utils;
+import printers.AccountPrinter;
+import rdg.AccountType;
+import main.Utils;
 import rdg.Account;
 import rdg.AccountFinder;
 
@@ -10,9 +10,8 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
-import static entities.Utils.uniqueRandomAccountNumber;
+import static main.Utils.uniqueRandomAccountNumber;
 
 public class TermAccountsOperations extends Operations {
 
@@ -46,13 +45,13 @@ public class TermAccountsOperations extends Operations {
         a.setAvailableBalance(balance);
         a.setCurrentBalance(balance);
         a.setAccountType(AccountType.TERM.name());
-        BigDecimal interestRate = new BigDecimal(Utils.getStringFromInput("Enter interest rate:")); //todo change all bigdecimals utils to string????? in all accs
+        BigDecimal interestRate = new BigDecimal(Utils.getStringFromInput("Enter interest rate:"));
         a.setInterestRate(interestRate);
 
         String commitmentTillString = Utils.getStringFromInput("Enter commitment ending date (dd.mm.yyyy):");
         java.util.Date date = new SimpleDateFormat("dd.MM.yyyy").parse(commitmentTillString);
         java.sql.Date commitmentTill = new java.sql.Date(date.getTime());
-        a.setCommitmentTill(commitmentTill);//todo add date commitment!!!!
+        a.setCommitmentTill(commitmentTill);
 
         Integer currencyId = Utils.getIntFromInput("Enter currency ID:");
         a.setCurrencyId(currencyId);

@@ -1,8 +1,7 @@
-package db_operations;
+package ui_operations;
 
-import entities.*;
-import rdg.Account;
-import rdg.AccountFinder;
+import printers.*;
+import main.Utils;
 import rdg.Transaction;
 import rdg.TransactionFinder;
 
@@ -16,8 +15,6 @@ public class TransactionsOperations extends Operations {
             case 0:
                 printAllTransactionsByAccountNumber();
                 break;
-//            default:
-//                throw Exception("Option is not defined") todo want this here?
         }
 
     }

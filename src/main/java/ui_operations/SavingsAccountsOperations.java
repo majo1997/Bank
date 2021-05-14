@@ -1,15 +1,15 @@
-package db_operations;
+package ui_operations;
 
-import entities.AccountPrinter;
-import entities.AccountType;
-import entities.Utils;
+import printers.AccountPrinter;
+import rdg.AccountType;
+import main.Utils;
 import rdg.Account;
 import rdg.AccountFinder;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
 
-import static entities.Utils.uniqueRandomAccountNumber;
+import static main.Utils.uniqueRandomAccountNumber;
 
 public class SavingsAccountsOperations extends Operations {
 
@@ -46,20 +46,18 @@ public class SavingsAccountsOperations extends Operations {
         a.setAvailableBalance(balance);
         a.setCurrentBalance(balance);
         a.setAccountType(AccountType.SAVINGS.name());
-        BigDecimal interestRate = new BigDecimal(Utils.getStringFromInput("Enter interest rate:")); //todo change all bigdecimals utils to string????? in all accs
+        BigDecimal interestRate = new BigDecimal(Utils.getStringFromInput("Enter interest rate:"));
         a.setInterestRate(interestRate);
 
-        String currentAccountNumber = Utils.getStringFromInput("Enter current account number:");//todo ak neexistuje ucet - osetrit
+        String currentAccountNumber = Utils.getStringFromInput("Enter current account number:");
         Account currentAccount = AccountFinder.getInstance().findByAccountNumberAndType(currentAccountNumber, AccountType.CURRENT);
 
         a.setCurrentAccountId(currentAccount.getId());
         a.setCurrencyId(currentAccount.getCurrencyId());
-//        Integer customerId = Utils.getIntFromInput("Enter customer ID:");//todo customer id nastavujem tomu kto ma konkretny current acc alebo mam aj toto sledovat?
         a.setCustomerId(currentAccount.getCustomerId());
 
 
         a.insert();
-        //todo pri prevodoch pozerat kolko za mesiac transakcii z neho sa vykonalo a podla toho uctovat poplatky/ pozriet uctovanie poplatkov este
 
         System.out.println("Account has been sucessfully created");
         System.out.print("New account ID: ");

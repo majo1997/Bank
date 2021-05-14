@@ -1,4 +1,4 @@
-package entities;
+package rdg;
 
 public enum AccountType {
     CURRENT,

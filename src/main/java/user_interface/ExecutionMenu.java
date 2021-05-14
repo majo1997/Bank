@@ -1,6 +1,8 @@
 package user_interface;
 
-import db_operations.Operations;
+import main.DbContext;
+import ts.TransferException;
+import ui_operations.Operations;
 
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -13,7 +15,7 @@ public class ExecutionMenu extends RoutingMenu {
      *
      * @return boolean, whether the current menu will be closed
      * */
-    public boolean showAndSelect() {//todo mozno bude dobre ak sa vytvori nova superclassa/interface pre tie koncove menu triedy
+    public boolean showAndSelect() {
         show();
 
         int choice = getChoice();
@@ -26,7 +28,7 @@ public class ExecutionMenu extends RoutingMenu {
             }
             catch(SQLException e){
                 throw new RuntimeException(e);
-            }//todo catch exceptions here??
+            }
             catch(ParseException e) {
                 System.out.println("Wrong value/format entered");
             }

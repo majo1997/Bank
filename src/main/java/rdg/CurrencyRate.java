@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class CurrencyRate {
-    private final Integer PRECISION = 10; //todo neviem ci toto nedat inde, mozno v create table pridat na update alebo insert/delete nieco aby sa spravilo aj opacne
+    private final Integer PRECISION = 10;
 
     private Integer id;
     private Integer fromCurrencyId;
@@ -68,26 +68,6 @@ public class CurrencyRate {
             }
         }
 
-//        //todo ak existuje tak vynimku vyhod??
-//        String sql = "INSERT INTO currency_rates (from_id, to_id, rate) VALUES (?, ?, ?); " +
-//                "INSERT INTO currency_rates (from_id, to_id, rate) VALUES (?, ?, ?); ";
-//
-//        Connection conn = DbContext.getConnection();
-//
-//        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-//            ps.setInt(1, fromCurrencyId);
-//            ps.setInt(2, toCurrencyId);
-//            ps.setBigDecimal(3, rate);
-//
-//            BigDecimal invertedRate = (new BigDecimal(1)).divide(rate, PRECISION, RoundingMode.HALF_UP);
-//            ps.setInt(4, toCurrencyId);
-//            ps.setInt(5, fromCurrencyId);
-//            ps.setBigDecimal(6, invertedRate);
-//
-//            ps.executeUpdate();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public void update() throws SQLException {
@@ -107,28 +87,6 @@ public class CurrencyRate {
             ps.executeUpdate();
         }
 
-
-
-//        String sql = "UPDATE currency_rates " +
-//                "SET rate = ?" +
-//                "WHERE (from_id = ? AND to_id = ?);" +
-//                "UPDATE currency_rates SET rate = ? WHERE (to_id = ? AND from_id = ?);";
-//
-//        Connection conn = DbContext.getConnection();
-//
-//        try(PreparedStatement ps = conn.prepareStatement(sql)) {
-//            BigDecimal invertedRate = (new BigDecimal(1)).divide(rate, PRECISION, RoundingMode.HALF_UP);
-//            ps.setBigDecimal(1, rate);
-//            ps.setInt(2, fromCurrencyId);
-//            ps.setInt(3, toCurrencyId);
-//            ps.setBigDecimal(4, invertedRate);
-//            ps.setInt(5, fromCurrencyId);
-//            ps.setInt(6, toCurrencyId);
-//
-//            ps.executeUpdate();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public void delete() throws SQLException {

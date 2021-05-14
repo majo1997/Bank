@@ -1,4 +1,4 @@
-package entities;
+package rdg;
 
 import main.DbContext;
 
@@ -19,7 +19,6 @@ public class NewCustomerCountsStatisticFinder {
 
     public List<NewCustomerCountsStatistic> findAll() throws SQLException {
 
-        //todo add also year quater where it is 0
         try (PreparedStatement ps = DbContext.getConnection().prepareStatement(
                 "SELECT EXTRACT(year FROM datetime) y, " +
                         "EXTRACT(quarter FROM datetime) quarter, " +

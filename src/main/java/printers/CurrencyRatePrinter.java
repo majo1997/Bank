@@ -1,14 +1,23 @@
-package entities;
+package printers;
 
 import rdg.CurrencyRate;
 
+/**
+ * Printer for Currency rates
+ * */
 public class CurrencyRatePrinter {
     private static final CurrencyRatePrinter INSTANCE = new CurrencyRatePrinter();
 
+    /**
+     * @return instance of currency rate printer
+     * */
     public static CurrencyRatePrinter getInstance() { return INSTANCE; }
 
     private CurrencyRatePrinter() { }
 
+    /**
+     * @param currencyRate currency rate to print
+     * */
     public void print(CurrencyRate currencyRate) {
         if (currencyRate == null) {
             throw new NullPointerException("Currency rate is null");

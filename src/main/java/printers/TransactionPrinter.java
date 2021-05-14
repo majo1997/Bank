@@ -1,14 +1,23 @@
-package entities;
+package printers;
 
 import rdg.Transaction;
 
+/**
+ * Printer for transactions
+ * */
 public class TransactionPrinter {
     private static final TransactionPrinter INSTANCE = new TransactionPrinter();
 
+    /**
+     * @return instance of transaction printer
+     * */
     public static TransactionPrinter getInstance() { return INSTANCE; }
 
     private TransactionPrinter() { }
 
+    /**
+     * @param transaction transaction to print
+     * */
     public void print(Transaction transaction) {
         if (transaction == null) {
             throw new NullPointerException("Transaction is null");

@@ -1,4 +1,4 @@
-package entities;
+package rdg;
 
 public class NewCustomerCountsStatistic {
     private Integer year;

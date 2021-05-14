@@ -11,10 +11,19 @@ import java.util.List;
 public class CurrencyRateFinder {
     private static final CurrencyRateFinder INSTANCE = new CurrencyRateFinder();
 
+    /**
+     * @return instance of currency rate finder
+     * */
     public static CurrencyRateFinder getInstance() {
         return INSTANCE;
     }
 
+    /**
+     * @param fromId source currency ID
+     * @param toId destination currency ID
+     *
+     * @return currency rate by specified ids
+     * */
     public CurrencyRate findCurrencyRateByCurrencyIds(Integer fromId, Integer toId) throws SQLException {
 
         try (PreparedStatement ps = DbContext.getConnection().prepareStatement("SELECT * FROM currency_rates WHERE from_id = ? AND to_id = ?")) {
@@ -42,7 +51,9 @@ public class CurrencyRateFinder {
         }
     }
 
-    //todo nechavam oba smery pre kazde 2 meny
+    /**
+     * @return all currency rates list
+     * */
     public List<CurrencyRate> findAllCurrencyRates() throws SQLException {
         try (PreparedStatement ps = DbContext.getConnection().prepareStatement("SELECT * FROM currency_rates")) {
 

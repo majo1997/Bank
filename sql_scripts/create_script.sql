@@ -1,4 +1,3 @@
---todo table constraints uniq, not null etc.
 DROP TABLE IF EXISTS transactions CASCADE;
 DROP TABLE IF EXISTS payment_cards CASCADE;
 DROP TABLE IF EXISTS activation_changes CASCADE;
@@ -18,8 +17,9 @@ CREATE TABLE currency_rates (
     from_id INTEGER REFERENCES currencies,
     to_id INTEGER REFERENCES currencies,
     rate NUMERIC,
-    UNIQUE (from_id, to_id), --todo always add both ways...
-    CHECK (from_id != to_id) --todo in transactions same??
+    UNIQUE (from_id, to_id),
+    CHECK (from_id != to_id),
+    CHECK (rate > 0)
 );
 
 CREATE TABLE customers (
@@ -32,16 +32,16 @@ CREATE TABLE customers (
 
 CREATE TABLE accounts (
     id SERIAL PRIMARY KEY,
-    account_number VARCHAR(30) UNIQUE ,
+    account_number VARCHAR(30) UNIQUE,
     active BOOLEAN,
     available_balance NUMERIC,
     current_balance NUMERIC,
-    account_type VARCHAR(10),--todo acc type 'CURRENT', 'SAVINGS', 'TERM',
+    account_type VARCHAR(10),
     interest_rate NUMERIC,
     commitment_till DATE,
     currency_id INTEGER REFERENCES currencies,
     customer_id INTEGER REFERENCES customers,
-    current_account_id INTEGER REFERENCES accounts, --todo pre savings accounts, moze byt odkaz iba na current accs
+    current_account_id INTEGER REFERENCES accounts,
     CHECK (current_balance >= available_balance)
 );
 
@@ -53,14 +53,14 @@ CREATE TABLE transactions (
     to_account VARCHAR(30),
     datetime TIMESTAMP,
     completed BOOLEAN,
-    type VARCHAR(20), -- todo pripis na ucet alebo normalny presun/vyber z atm/vklad -- definovat si co bude definovane pri kazdom type
+    type VARCHAR(20),
     amount NUMERIC,
     currency_id INTEGER REFERENCES currencies
 );
 
 CREATE TABLE payment_cards (
     id SERIAL PRIMARY KEY,
-    --current_account_id INTEGER REFERENCES accounts
+    current_account_id INTEGER REFERENCES accounts,
     card_id	VARCHAR(30) UNIQUE
 );
 
@@ -69,7 +69,7 @@ CREATE TABLE activation_changes (
     active BOOLEAN,
     datetime TIMESTAMP,
     customer_id INTEGER REFERENCES customers
-);--todo nastavit active a now ak sa prida novy customer
+);
 
 CREATE TABLE account_statements (
     id SERIAL PRIMARY KEY,
@@ -78,6 +78,44 @@ CREATE TABLE account_statements (
     datetime TIMESTAMP
 );
 
---todo create indexes for columns used for search...
--- CREATE INDEX nazov
--- ON tablename(tablecolumnname)
+
+DROP INDEX IF EXISTS srcAccountTransactionsIndex;
+DROP INDEX IF EXISTS destAccountTransactionsIndex;
+DROP INDEX IF EXISTS customersIndex;
+DROP INDEX IF EXISTS currencyRatesIndex;
+DROP INDEX IF EXISTS accountsIdIndex;
+DROP INDEX IF EXISTS currentAccountsIndex;
+DROP INDEX IF EXISTS accountNumberIndex;
+DROP INDEX IF EXISTS accountNumberTypeIndex;
+DROP INDEX IF EXISTS customerAccountsTypeIndex;
+
+CREATE INDEX srcAccountTransactionsIndex
+ON transactions(to_account);
+
+CREATE INDEX destAccountTransactionsIndex
+ON transactions(from_account);
+
+CREATE INDEX customersIndex
+ON customers(birth_number);
+
+CREATE INDEX currencyRatesIndex
+ON currency_rates(from_id, to_id);
+
+CREATE INDEX accountsIdIndex
+ON accounts(id);
+
+CREATE INDEX currentAccountsIndex
+ON accounts(current_account_id);
+
+CREATE INDEX accountNumberIndex
+ON accounts(account_number);
+
+CREATE INDEX accountNumberTypeIndex
+ON accounts(account_number, account_type);
+
+CREATE INDEX customerAccountsTypeIndex
+ON accounts(customer_id, account_type);
+
+--needed for customers statistic with larger data
+CREATE INDEX activationChangesIndex
+ON activation_changes(datetime);

@@ -1,6 +1,6 @@
 package ts;
 
-import entities.AccountType;
+import rdg.AccountType;
 import rdg.Account;
 import rdg.AccountFinder;
 import rdg.Transaction;
@@ -17,13 +17,12 @@ public class DeactivateAccount {
         return INSTANCE;
     }
 
-    public void deactivateAccount(String accountNumber) throws /*todo CallException*/ SQLException {
+    public void deactivateAccount(String accountNumber) throws SQLException, DeactivationException {
+
         Account a = AccountFinder.getInstance().findByAccountNumber(accountNumber);
 
         if(a == null) {
-            //todo ucet neexistuje
-            //return prec todo
-            return;
+            throw new DeactivationException("Account doesn't exist");
         }
 
         AccountType accountType = AccountType.valueOf(a.getAccountType());
@@ -65,11 +64,17 @@ public class DeactivateAccount {
                     a.setActive(false);
                     a.update();
                 }
+                else {
+                    throw new DeactivationException("There is some balance on current account");
+                }
                 break;
             case TERM:
                 if(a.getCurrentBalance().compareTo(BigDecimal.ZERO) == 0) {
                     a.setActive(false);
                     a.update();
+                }
+                else {
+                    throw new DeactivationException("There is some balance on term account");
                 }
                 break;
             case SAVINGS:
@@ -88,7 +93,7 @@ public class DeactivateAccount {
                 Timestamp now = new Timestamp(System.currentTimeMillis());
 
                 t.setFromId(a.getId());
-                t.setToId(currentAccount.getCurrentAccountId());
+                t.setToId(currentAccount.getId());
                 t.setFromAccount(a.getAccountNumber());
                 t.setToAccount(currentAccount.getAccountNumber());
                 t.setDatetime(now);
@@ -101,28 +106,5 @@ public class DeactivateAccount {
                 break;
         }
 
-
-
-//        if (duration <= 0) {
-//            throw new IllegalArgumentException("duration must be greater than 0");
-//        }
-//
-//        int callId = CallService.getInstance().startCall(sourceNumber, destinationNumber, STEP_DURATION);
-//
-//        System.out.print("LOG: The call has started. Call id: ");
-//        System.out.println(callId);
-//
-//        Thread.sleep(STEP_SLEEP);
-//        System.out.println("LOG: One second has passed");
-//
-//        for (int i = 1; i < duration; ++i) {
-//
-//            CallService.getInstance().makeCallStep(callId, STEP_DURATION);
-//
-//            Thread.sleep(STEP_SLEEP);
-//            System.out.println("LOG: One second has passed");
-//        }
-//
-//        System.out.println("LOG: The call ended.");
     }
 }

@@ -1,10 +1,9 @@
-package db_operations;
+package ui_operations;
 
-import entities.*;
+import printers.*;
+import main.Utils;
 import rdg.CurrencyRate;
 import rdg.CurrencyRateFinder;
-import rdg.Transaction;
-import rdg.TransactionFinder;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -12,7 +11,7 @@ import java.sql.SQLException;
 public class CurrenciesOperations extends Operations {
 
     @Override
-    public void invoke(int choice) throws SQLException {//todo rename everywhere choice to option??
+    public void invoke(int choice) throws SQLException {
         switch(choice) {
             case 0:
                 printAllCurrencyRates();
@@ -34,13 +33,10 @@ public class CurrenciesOperations extends Operations {
             CurrencyRatePrinter.getInstance().print(cr);
         }
 
-//        CurrencyRates currencyRates = new CurrencyRates();
-//        currencyRates.print();
     }
 
     public void createNewCurrencyRate() throws SQLException {
         CurrencyRate cr = new CurrencyRate();
-//todo always read values first and continue then
         Integer fromCurrencyId = Utils.getIntFromInput("Enter from currency ID:");
         cr.setFromCurrencyId(fromCurrencyId);
         Integer toCurrencyId = Utils.getIntFromInput("Enter to currency ID:");
@@ -53,13 +49,7 @@ public class CurrenciesOperations extends Operations {
         System.out.println("Currency rate has been sucessfully added");
         System.out.print("Currency rate ID: ");
         System.out.println(cr.getId());
-//        Integer fromCurrencyId = Utils.getIntFromInput("Enter from currency ID:");
-//        Integer toCurrencyId = Utils.getIntFromInput("Enter to currency ID:");
-//        BigDecimal rate = new BigDecimal(Utils.getStringFromInput("Enter currency rate:"));
-//
-//        CurrencyRate currencyRate = new CurrencyRate(fromCurrencyId, toCurrencyId, rate);
-//        currencyRate.insert();
-//        //todo osetrit ak chcem vlozit existujuci kurz
+
     }
 
     public void updateCurrencyRate() throws SQLException {
@@ -73,18 +63,6 @@ public class CurrenciesOperations extends Operations {
 
         cr.update();
 
-//        Integer fromCurrencyId = Utils.getIntFromInput("Enter from currency ID:");
-//        Integer toCurrencyId = Utils.getIntFromInput("Enter to currency ID:");
-//        BigDecimal newRate = new BigDecimal(Utils.getStringFromInput("Enter new currency rate:"));
-//
-//        try {
-//            CurrencyRate currencyRate = new CurrencyRate(fromCurrencyId, toCurrencyId);
-//            currencyRate.changeRate(newRate);
-//            currencyRate.update();
-//        }
-//        catch(InvalidValueException ex) {
-//            System.out.println(ex.getMessage());
-//        }
     }
 
     public void deleteCurrencyRate() throws SQLException {
@@ -101,14 +79,7 @@ public class CurrenciesOperations extends Operations {
             cr.delete();
             System.out.println("Currency rate has been successfully deleted");
         }
-//
-//        try {
-//            CurrencyRate currencyRate = new CurrencyRate(fromCurrencyId, toCurrencyId);
-//            currencyRate.delete();
-//        }
-//        catch(InvalidValueException ex) {
-//            System.out.println(ex.getMessage());
-//        }
+
     }
 
 }

@@ -11,10 +11,16 @@ import java.util.List;
 public class CustomerFinder {
     private static final CustomerFinder INSTANCE = new CustomerFinder();
 
+    /**
+     * @return instance of customer finder
+     * */
     public static CustomerFinder getInstance() {
         return INSTANCE;
     }
 
+    /**
+     * @return customer specified by birth number
+     * */
     public Customer findByBirthNumber(String birthNumber) throws SQLException {
 
         try (PreparedStatement ps = DbContext.getConnection().prepareStatement("SELECT * FROM customers WHERE birth_number = ?")) {
@@ -42,6 +48,9 @@ public class CustomerFinder {
         }
     }
 
+    /**
+     * @return list of all customers
+     * */
     public List<Customer> findAll() throws SQLException {
         try (PreparedStatement ps = DbContext.getConnection().prepareStatement("SELECT * FROM customers")) {
             try (ResultSet rs = ps.executeQuery()) {

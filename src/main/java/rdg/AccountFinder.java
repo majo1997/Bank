@@ -1,6 +1,5 @@
 package rdg;
 
-import entities.AccountType;
 import main.DbContext;
 
 import java.sql.PreparedStatement;
@@ -12,10 +11,18 @@ import java.util.List;
 public class AccountFinder {
     private static final AccountFinder INSTANCE = new AccountFinder();
 
+    /**
+     * @return instance of account finder
+     * */
     public static AccountFinder getInstance() {
         return INSTANCE;
     }
 
+    /**
+     * @param accountId account ID
+     *
+     * @return account
+     * */
     public Account findByAccountId(Integer accountId) throws SQLException {
 
         try (PreparedStatement ps = DbContext.getConnection().prepareStatement("SELECT * FROM accounts WHERE id = ?")) {
@@ -51,6 +58,11 @@ public class AccountFinder {
         }
     }
 
+    /**
+     * @param accountId current account ID
+     *
+     * @return list of savings accounts
+     * */
     public List<Account> findCurrentSavingsAccountsByAccountId(Integer accountId) throws SQLException {
         try (PreparedStatement ps = DbContext.getConnection().prepareStatement("SELECT * FROM accounts WHERE current_account_id = ?")) {
             ps.setInt(1, accountId);
@@ -84,6 +96,11 @@ public class AccountFinder {
         }
     }
 
+    /**
+     * @param accountNumber account number
+     *
+     * @return account with specified account number
+     * */
     public Account findByAccountNumber(String accountNumber) throws SQLException {
 
         try (PreparedStatement ps = DbContext.getConnection().prepareStatement("SELECT * FROM accounts WHERE account_number = ?")) {
@@ -119,6 +136,12 @@ public class AccountFinder {
         }
     }
 
+    /**
+     * @param accountNumber account number
+     * @param accountType type of account to get
+     *
+     * @return account if exists
+     * */
     public Account findByAccountNumberAndType(String accountNumber, AccountType accountType) throws SQLException {
 
         try (PreparedStatement ps = DbContext.getConnection().prepareStatement("SELECT * FROM accounts WHERE account_number = ? AND account_type = ?")) {
@@ -155,6 +178,12 @@ public class AccountFinder {
         }
     }
 
+    /**
+     * @param customerId customer ID
+     * @param accountType Type of accounts to get
+     *
+     * @return list of accounts specified by params
+     * */
     public List<Account> findAllAccountsByCustomerIdAndType(Integer customerId, AccountType accountType) throws SQLException {
         try (PreparedStatement ps = DbContext.getConnection().prepareStatement("SELECT * FROM accounts WHERE customer_id = ? AND account_type = ?")) {
             ps.setInt(1, customerId);

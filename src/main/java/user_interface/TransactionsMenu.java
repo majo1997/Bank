@@ -1,6 +1,6 @@
 package user_interface;
 
-import db_operations.TransactionsOperations;
+import ui_operations.TransactionsOperations;
 
 import java.util.LinkedHashMap;
 

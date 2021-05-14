@@ -34,15 +34,10 @@ public class DbContext {
         return connection;
     }
 
-    //todo this
-    public static void setTransaction() {
-        try {
-            connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
 
+    /**
+     * close Connection to database
+     * */
     public static void closeConnection() {
         try {
             connection.close();

@@ -1,6 +1,5 @@
 package rdg;
 
-
 import main.DbContext;
 
 import java.math.BigDecimal;
@@ -10,13 +9,13 @@ public class Transaction  {
     private Integer id;
     private Integer fromId;
     private Integer toId;
-    private String fromAccount; //todo means account not in our db
-    private String toAccount;   //todo same as above
+    private String fromAccount;
+    private String toAccount;
     private Timestamp datetime;
     private boolean completed;
     private String type;
     private BigDecimal amount;
-    private Integer currencyId; //fromAccount currency, mainly used when fromAccount is not from our bank
+    private Integer currencyId; //fromAccount currency ID
 
     public Integer getId() {
         return id;
@@ -98,6 +97,9 @@ public class Transaction  {
         this.currencyId = currencyId;
     }
 
+    /**
+     * Update a transaction row in transactions table
+     * */
     public void update() throws SQLException {
         if(id == null) {
             throw new IllegalStateException("Transaction ID is not set");
@@ -113,6 +115,9 @@ public class Transaction  {
         }
     }
 
+    /**
+     * Insert a transaction row into transactions table
+     * */
     public void insert() throws SQLException {
         try (PreparedStatement ps = DbContext.getConnection().prepareStatement("INSERT INTO transactions (from_id, to_id, from_account, to_account, datetime, completed, type, amount, currency_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, fromId);

@@ -1,8 +1,5 @@
-package entities;
+package main;
 
-import main.DbContext;
-
-import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,8 +7,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+/**
+ * This class contains some util functions
+ * */
 public class Utils {
-    //todo if empty str is scanned throw Exceotion? primary for loading bigdecimal from string// for bigdecimal use . as decimal sep
+    /**
+     * @param message which will be printed to user
+     *
+     * @return string typed by user
+     * */
     public static String getStringFromInput(String message) {
         System.out.print(message + " ");
 
@@ -20,6 +24,11 @@ public class Utils {
         return sc.nextLine();
     }
 
+    /**
+     * @param message which will be printed to user
+     *
+     * @return integer typed by user
+     * */
     public static Integer getIntFromInput(String message) {
         System.out.print(message + " ");
 
@@ -28,15 +37,9 @@ public class Utils {
         return sc.nextInt();
     }
 
-    public static BigDecimal getBigDecimalFromInput(String message) {//todo remove
-        System.out.print(message + " ");
-
-        Scanner sc = new Scanner(System.in);
-
-        return sc.nextBigDecimal();
-    }
-
-    //todo check this 3 methods
+    /**
+     * @return string of not used account number
+     * */
     public static String uniqueRandomAccountNumber() {
         //SK3386785834159015377697197684//28 - 2 = 30
         boolean unique = false;
@@ -58,7 +61,7 @@ public class Utils {
         StringBuilder sb = new StringBuilder();
         sb.append("SK");
 
-        for(int i = 0; i < 28; i++) {//todo constant 28
+        for(int i = 0; i < 28; i++) {
             int randomIndex = random.nextInt(CHARACTERS.length());
             sb.append(CHARACTERS.charAt(randomIndex));
         }
@@ -86,6 +89,5 @@ public class Utils {
 
         return false;
     }
-    //todo ^^^
 
 }

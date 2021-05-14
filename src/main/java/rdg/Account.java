@@ -115,7 +115,7 @@ public class Account {
         }
 
         Connection conn = DbContext.getConnection();
-//todo check if add some others params to update
+
         try(PreparedStatement ps = conn.prepareStatement("UPDATE accounts SET active = ?, available_balance = ?, current_balance = ? WHERE id = ?")) {
             ps.setBoolean(1, active);
             ps.setBigDecimal(2, availableBalance);
