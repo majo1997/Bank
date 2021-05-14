@@ -1,38 +1,62 @@
 package db_operations;
 
-import entities.Customer;
-import entities.Customers;
-import entities.InvalidValueException;
-import entities.Utils;
+import entities.*;
+import rdg.CustomerFinder;
+import rdg.Customer;
+
+import java.sql.SQLException;
 
 
 public class CustomersOperations extends Operations {
-    @Override
-    public void invoke1() {
-        Customers customers = new Customers();
-        customers.print();
-    }
 
     @Override
-    public void invoke2() {
+    public void invoke(int choice) throws SQLException{
+        switch(choice) {
+            case 0:
+                printAllCustomers();
+                break;
+            case 1:
+                printCustomerByBirthNumber();
+                break;
+            case 2:
+                updateCustomerByBirthNumber();
+                break;
+        }
+    }
+
+    public void printAllCustomers() throws SQLException {
+        for(Customer c: CustomerFinder.getInstance().findAll()) {
+            CustomerPrinter.getInstance().print(c);
+        }
+    }
+
+    public void printCustomerByBirthNumber() throws SQLException {
         String birthNumber = Utils.getStringFromInput("Enter birth number:");
 
-        try {
-            Customer c = new Customer(birthNumber);
-            System.out.println(c);
+        Customer c = CustomerFinder.getInstance().findByBirthNumber(birthNumber);
+        if(c == null) {
+            System.out.println("There is not customer with entered birth number");
         }
-        catch(InvalidValueException ex) {
-            System.out.println(ex.getMessage());
+        else {
+            CustomerPrinter.getInstance().print(c);
         }
+//        try {
+//            Customer c = new Customer(birthNumber);
+//            System.out.println(c);
+//        }
+//        catch(InvalidValueException ex) {
+//            System.out.println(ex.getMessage());
+//        } todo remove
     }
 
-    @Override
-    public void invoke3() {
-        String birthNumber = Utils.getStringFromInput("Enter birth number:");//todo spytat sa co si mam tu pytat id/rodne c.
+    public void updateCustomerByBirthNumber() throws SQLException {
+        String birthNumber = Utils.getStringFromInput("Enter birth number:");
 
-        try {
-            Customer c = new Customer(birthNumber);
-
+        Customer c = CustomerFinder.getInstance().findByBirthNumber(birthNumber);
+        if(c == null) {
+            System.out.println("There is not customer with entered birth number");
+        }
+        else {
             System.out.println("Update customer information(Leave blank to keep current):");
             String newFirstName = Utils.getStringFromInput("Enter new first name:");
             if(!newFirstName.isEmpty()) {
@@ -48,41 +72,33 @@ public class CustomersOperations extends Operations {
             }
 
             c.update();
-
-            System.out.println("Customer (" + c.toString() + ") updated successfully");
         }
-        catch(InvalidValueException ex) {
-            System.out.println(ex.getMessage());
-        }
+
+
+//        try {
+//            Customer c = new Customer(birthNumber);
+//
+//            System.out.println("Update customer information(Leave blank to keep current):");
+//            String newFirstName = Utils.getStringFromInput("Enter new first name:");
+//            if(!newFirstName.isEmpty()) {
+//                c.setFirstName(newFirstName);
+//            }
+//            String newLastName = Utils.getStringFromInput("Enter new last name:");
+//            if(!newLastName.isEmpty()) {
+//                c.setLastName(newLastName);
+//            }
+//            String newAddress = Utils.getStringFromInput("Enter new address:");
+//            if(!newAddress.isEmpty()) {
+//                c.setAddress(newAddress);
+//            }
+//
+//            c.update();
+//
+//            System.out.println("Customer (" + c.toString() + ") updated successfully");
+//        }
+//        catch(InvalidValueException ex) {
+//            System.out.println(ex.getMessage());
+//        } todo remove
     }
 
-    @Override
-    public void invoke4() {
-
-    }
-
-    @Override
-    public void invoke5() {
-
-    }
-
-    @Override
-    public void invoke6() {
-
-    }
-
-    @Override
-    public void invoke7() {
-
-    }
-
-    @Override
-    public void invoke8() {
-
-    }
-
-    @Override
-    public void invoke9() {
-
-    }
 }

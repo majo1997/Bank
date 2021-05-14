@@ -1,53 +1,35 @@
 package db_operations;
 
-import entities.Transactions;
-import entities.Utils;
+import entities.*;
+import rdg.Account;
+import rdg.AccountFinder;
+import rdg.Transaction;
+import rdg.TransactionFinder;
+
+import java.sql.SQLException;
 
 public class TransactionsOperations extends Operations {
+
     @Override
-    public void invoke1() {
+    public void invoke(int choice) throws SQLException {
+        switch(choice) {
+            case 0:
+                printAllTransactionsByAccountNumber();
+                break;
+//            default:
+//                throw Exception("Option is not defined") todo want this here?
+        }
+
+    }
+
+    public void printAllTransactionsByAccountNumber() throws SQLException {
         String accountNumber = Utils.getStringFromInput("Enter account number:");
-        Transactions transactions = new Transactions(accountNumber);
-        transactions.print();
-    }
 
-    @Override
-    public void invoke2() {
-
-    }
-
-    @Override
-    public void invoke3() {
-
-    }
-
-    @Override
-    public void invoke4() {
-
-    }
-
-    @Override
-    public void invoke5() {
-
-    }
-
-    @Override
-    public void invoke6() {
-
-    }
-
-    @Override
-    public void invoke7() {
-
-    }
-
-    @Override
-    public void invoke8() {
-
-    }
-
-    @Override
-    public void invoke9() {
-
+        for(Transaction t: TransactionFinder.getInstance().findAllTransactionsByAccountNumber(accountNumber)) {
+            TransactionPrinter.getInstance().print(t);
+        }
+//        String accountNumber = Utils.getStringFromInput("Enter account number:");
+//        Transactions transactions = new Transactions(accountNumber);
+//        transactions.print();
     }
 }

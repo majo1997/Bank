@@ -1,6 +1,5 @@
---todo table constraints uniq, not null
+--todo table constraints uniq, not null etc.
 DROP TABLE IF EXISTS transactions CASCADE;
--- DROP TABLE IF EXISTS transaction_statuses CASCADE;
 DROP TABLE IF EXISTS payment_cards CASCADE;
 DROP TABLE IF EXISTS activation_changes CASCADE;
 DROP TABLE IF EXISTS customers CASCADE;
@@ -33,24 +32,18 @@ CREATE TABLE customers (
 
 CREATE TABLE accounts (
     id SERIAL PRIMARY KEY,
-    account_number VARCHAR(30) UNIQUE ,--uniq
+    account_number VARCHAR(30) UNIQUE ,
     active BOOLEAN,
     available_balance NUMERIC,
     current_balance NUMERIC,
-    account_type VARCHAR,--acc type
+    account_type VARCHAR(10),--todo acc type 'CURRENT', 'SAVINGS', 'TERM',
     interest_rate NUMERIC,
     commitment_till DATE,
     currency_id INTEGER REFERENCES currencies,
     customer_id INTEGER REFERENCES customers,
-    current_account_id INTEGER REFERENCES accounts, --todo pre savings accounts
+    current_account_id INTEGER REFERENCES accounts, --todo pre savings accounts, moze byt odkaz iba na current accs
     CHECK (current_balance >= available_balance)
 );
-
---todo remove this
--- CREATE TABLE transaction_statuses (
---     id SERIAL PRIMARY KEY,
---     name VARCHAR(20) UNIQUE
--- );
 
 CREATE TABLE transactions (
     id SERIAL PRIMARY KEY,
@@ -76,13 +69,15 @@ CREATE TABLE activation_changes (
     active BOOLEAN,
     datetime TIMESTAMP,
     customer_id INTEGER REFERENCES customers
-);--todo pridat active a now ak sa prida novy customer
+);--todo nastavit active a now ak sa prida novy customer
 
 CREATE TABLE account_statements (
     id SERIAL PRIMARY KEY,
-    statement TEXT,--unknown format
-    customer_id INTEGER REFERENCES customers
-    --todo add timestamp if needed
+    statement TEXT,
+    customer_id INTEGER REFERENCES customers,
+    datetime TIMESTAMP
 );
 
 --todo create indexes for columns used for search...
+-- CREATE INDEX nazov
+-- ON tablename(tablecolumnname)

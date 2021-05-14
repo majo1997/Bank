@@ -194,7 +194,7 @@ ON CONFLICT DO NOTHING;
 --             end loop;
 --     end;
 -- $$;
-
+--todo mozno negenerovat cisla uctov nahodne ale pridavat o 1 vacsie a vacsie kazdemu dalsiemu, a na current balance pridat ze generovanie cisla iba do velkosti currentbalance... alebo rovnake budu...
 INSERT INTO accounts (account_number, active, available_balance, current_balance, account_type, currency_id, customer_id)
 SELECT random_account_number(), random_boolean(), 500, 500, 'CURRENT', 1, 1--todo asi nechat rovnake hodnoty current a available balance/ ale generovat nahodne
 FROM generate_series(1, 10000)
